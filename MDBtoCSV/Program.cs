@@ -17,7 +17,6 @@ namespace MDBtoCSV
             string outFile = args[2];
             string contents = getContents(srcFile, srcTable);
             writeFile(contents, outFile);
-            Console.ReadLine();
         }
 
         static OleDbConnection getConn(string srcFile)
@@ -39,9 +38,15 @@ namespace MDBtoCSV
             int headerWidth = accessReader.FieldCount;
             for (int i = 0; i < headerWidth; i++)
             {
-                contents.AppendFormat("{0}, ", accessReader.GetName(i));
+                if (i < headerWidth - 1)
+                {
+                    contents.AppendFormat("{0}, ", accessReader.GetName(i).Trim());
+                }
+                else if (i == headerWidth - 1)
+                {
+                    contents.AppendLine(accessReader.GetName(i).Trim());
+                }
             }
-            contents.AppendFormat("\n");
             while (accessReader.Read())
             {
                 int rowWidth = accessReader.FieldCount;
@@ -49,17 +54,17 @@ namespace MDBtoCSV
                 {
                     if (i < rowWidth - 1)
                     {
-                        contents.AppendFormat("{0}, ", accessReader[i].ToString());
+                        contents.AppendFormat("{0}, ", accessReader[i].ToString().Trim());
                     }
                     else if (i == rowWidth - 1)
                     {
-                        contents.AppendFormat("{0}\n", accessReader[i].ToString());
+                        contents.AppendFormat("{0}\n", accessReader[i].ToString().Trim());
                     }
                 }
             }
             accessReader.Close();
             conn.Close();
-            return contents.ToString();
+            return contents.ToString().Trim();
         }
 
         static void writeFile(string contents, string outFile)
